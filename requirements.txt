@@ -1,13 +1,13 @@
 streamlit
 pandas
 numpy
+plotly
 networkx
 matplotlib
-plotly
-torch
-scipy
 
-geopandas==0.14.4
-fiona==1.9.6
-shapely==2.0.4
-pyproj==3.6.1
+scipy==1.11.4
+
+geopandas==0.13.2
+fiona==1.9.5
+shapely==2.0.1
+pyproj==3.6.0
