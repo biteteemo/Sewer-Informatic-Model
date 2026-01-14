@@ -177,31 +177,44 @@ def create_map(df_pipe, gdf_bldg=None, show_buildings=True):
         name="Pipes"
     ))
 
-    # --- 建筑 ---
+    # --- 建筑（⚠️ 安全判断）---
     if gdf_bldg is not None and show_buildings:
-        c = gdf_bldg.geometry.centroid
-        fig.add_trace(go.Scatter(
-            x=c.x,
-            y=c.y,
-            mode="markers",
-            marker=dict(
-                size=np.clip(gdf_bldg["flow_m3s"] * 5000, 4, 16),
-                color=gdf_bldg["COD_kgd"],
-                colorscale="YlOrRd",
-                colorbar=dict(title="COD (kg/d)")
-            ),
-            name="Buildings",
-            hovertemplate=(
-                "Population: %{customdata[0]:.1f}<br>"
-                "Flow: %{customdata[1]:.5f} m³/s<br>"
-                "COD: %{customdata[2]:.2f} kg/d<extra></extra>"
-            ),
-            customdata=np.column_stack([
-                gdf_bldg["population_calc"],
-                gdf_bldg["flow_m3s"],
-                gdf_bldg["COD_kgd"]
-            ])
-        ))
+        centroids = gdf_bldg.geometry.centroid
+
+        # ✅ 情况 1：还没生成负荷
+        if "flow_m3s" not in gdf_bldg.columns:
+            fig.add_trace(go.Scatter(
+                x=centroids.x,
+                y=centroids.y,
+                mode="markers",
+                marker=dict(size=4, color="rgba(52,152,219,0.6)"),
+                name="Buildings"
+            ))
+
+        # ✅ 情况 2：已生成负荷
+        else:
+            fig.add_trace(go.Scatter(
+                x=centroids.x,
+                y=centroids.y,
+                mode="markers",
+                marker=dict(
+                    size=np.clip(gdf_bldg["flow_m3s"] * 5000, 4, 16),
+                    color=gdf_bldg["COD_kgd"],
+                    colorscale="YlOrRd",
+                    colorbar=dict(title="COD (kg/d)")
+                ),
+                name="Buildings",
+                hovertemplate=(
+                    "Population: %{customdata[0]:.1f}<br>"
+                    "Flow: %{customdata[1]:.5f} m³/s<br>"
+                    "COD: %{customdata[2]:.2f} kg/d<extra></extra>"
+                ),
+                customdata=np.column_stack([
+                    gdf_bldg["population_calc"],
+                    gdf_bldg["flow_m3s"],
+                    gdf_bldg["COD_kgd"]
+                ])
+            ))
 
     fig.update_layout(
         height=650,
@@ -265,3 +278,4 @@ if pipe_file:
 
 else:
     st.info("👈 Please upload a pipe network CSV to start.")
+
