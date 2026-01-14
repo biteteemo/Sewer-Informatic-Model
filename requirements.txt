@@ -8,3 +8,7 @@ pyproj
 plotly
 torch
 openpyxl
+geopandas
+shapely
+pyproj
+fiona
